@@ -29,10 +29,14 @@ import { isWindowAvailable } from '@/utils/navigation';
 export interface SidebarProps extends PropsWithChildren {
   routes: IRoute[];
   [x: string]: any;
+  orai: any;
+  wecoin: any;
 }
 
 function Sidebar(props: SidebarProps) {
-  const { routes, setApiKey } = props;
+  const { routes, orai, wecoin, setApiKey } = props;
+  console.log(orai, wecoin)
+
   // this is for the rest of the collapses
   let variantChange = '0.2s linear';
   let shadow = useColorModeValue(
@@ -69,7 +73,7 @@ function Sidebar(props: SidebarProps) {
           renderThumbVertical={renderThumb}
           renderView={renderView}
         >
-          <Content setApiKey={setApiKey} routes={routes} />
+          <Content setApiKey={setApiKey} routes={routes} orai={orai} wecoin={wecoin} />
         </Scrollbars>
       </Box>
     </Box>

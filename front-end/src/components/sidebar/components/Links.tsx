@@ -23,11 +23,20 @@ import { FaCircle } from 'react-icons/fa';
 import { IoMdAdd } from 'react-icons/io';
 import NavLink from '@/components/link/NavLink';
 import { IRoute } from '@/types/navigation';
-import { PropsWithChildren, useCallback } from 'react';
+import { PropsWithChildren, useCallback, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import {
+  getWecoinBalance,
+  getOraiBalance,
+  useOraiBalance,
+  useWecoinBalance,
+} from '@/api/counter';
+import { coin } from 'cosmwasm';
 
 interface SidebarLinksProps extends PropsWithChildren {
   routes: IRoute[];
+  orai: any;
+  wecoin: any;
 }
 
 export function SidebarLinks(props: SidebarLinksProps) {
@@ -40,7 +49,28 @@ export function SidebarLinks(props: SidebarLinksProps) {
   let iconColor = useColorModeValue('navy.700', 'white');
   let gray = useColorModeValue('gray.500', 'gray.500');
 
-  const { routes } = props;
+  // const [orai, setOrai] = useState({
+  //   denom: "orai",
+  //   amount: "0",
+  // });
+
+  // const [wecoin, setWecoin] = useState({
+  //   wecoinInfo: {
+  //     symbol: "WECOIN",
+  //   },
+  //   wecoinBalance: 0,
+  // });
+
+  // useEffect(() => {
+  //     getOraiBalance().then(data => {
+  //      console.log(data)
+  //     });
+  //     getWecoinBalance().then(data => {
+  //       console.log(data)
+  //     })
+  // }, [])
+
+  const { routes, orai, wecoin } = props;
 
   // verifies if routeName is the one active (in browser input)
   const activeRoute = useCallback(
@@ -51,7 +81,26 @@ export function SidebarLinks(props: SidebarLinksProps) {
   );
 
   // this function creates the links and collapses that appear in the sidebar (left menu)
-  const createLinks = (routes: IRoute[]) => {
+  const createLinks = (routes: IRoute[], orai: any, wecoin: any) => {
+    console.log(wecoin);
+    console.log(orai);
+    const { symbol, wecoinBalace } = wecoin;
+    return (
+      <>
+        <div>
+          <p>Denom: {orai.denom}</p>
+          <p>Balance: {orai.amount}</p>
+        </div>
+        ~
+        <div>
+          <p>Denom: {symbol}</p>
+          <p>Balance: {wecoinBalace.balance}</p>
+        </div>
+        <input placeholder="Amount" />
+        <button>Swap</button>
+      </>
+    );
+    /*
     return routes.map((route, key) => {
       if (route.collapse && !route.invisible) {
         
@@ -197,6 +246,7 @@ export function SidebarLinks(props: SidebarLinksProps) {
         );
       }
     });
+    */
   };
   // this function creates the links from the secondary accordions (for example auth -> sign-in -> default)
   const createAccordionLinks = (routes: IRoute[]) => {
@@ -237,7 +287,7 @@ export function SidebarLinks(props: SidebarLinksProps) {
     });
   };
   //  BRAND
-  return <>{createLinks(routes)}</>;
+  return <>{createLinks(routes, orai, wecoin)}</>;
 }
 
 export default SidebarLinks;

@@ -13,10 +13,15 @@ import '@/styles/App.css';
 import '@/styles/Contact.css';
 import '@/styles/Plugins.css';
 import '@/styles/MiniCalendar.css';
+import { useCount, useOraiBalance, useWecoinBalance } from '@/api/counter';
 
 function App({ Component, pageProps }: AppProps<{}>) {
   const pathname = usePathname();
   const [apiKey, setApiKey] = useState('');
+  let {orai} = useOraiBalance();
+  let {wecoin} = useWecoinBalance();
+  const { count, error, increase } = useCount();
+  const [isLoading, setLoading] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
   useEffect(() => {
     const initialKey = localStorage.getItem('apiKey');
@@ -24,11 +29,36 @@ function App({ Component, pageProps }: AppProps<{}>) {
       setApiKey(initialKey);
     }
   }, [apiKey]);
-
+  if (orai === undefined) {
+    orai = {
+      denom: "orai",
+      amount: "0",
+    }
+  }
+  if (wecoin === undefined) {
+    wecoin = {
+      symbol: "WECOIN",
+      wecoinBalace: "0",
+    }
+  }
   return (
     <ChakraProvider theme={theme}>
       <Box>
-        <Sidebar setApiKey={setApiKey} routes={routes} />
+      <p>
+          {count === undefined ? "?" : count}
+        </p>
+      <div >
+          <a
+            onClick={async () => {
+              setLoading(true);
+              await increase();
+              setLoading(false);
+            }}
+          >
+            <h2>＋ Increase Counter</h2>
+          </a>
+        </div>
+        <Sidebar setApiKey={setApiKey} routes={routes} orai={orai} wecoin={wecoin} />
         <Box
           pt={{ base: '60px', md: '100px' }}
           float="right"

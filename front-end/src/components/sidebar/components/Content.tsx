@@ -35,10 +35,12 @@ import { MdOutlineManageAccounts, MdOutlineSettings } from 'react-icons/md';
 interface SidebarContent extends PropsWithChildren {
   routes: IRoute[];
   [x: string]: any;
+  orai: any,
+  wecoin: any,
 }
 
 function SidebarContent(props: SidebarContent) {
-  const { routes, setApiKey } = props;
+  const { routes, setApiKey, orai, wecoin } = props;
   const textColor = useColorModeValue('navy.700', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.300');
   const bgColor = useColorModeValue('white', 'navy.700');
@@ -66,7 +68,7 @@ function SidebarContent(props: SidebarContent) {
       <Brand />
       <Stack direction="column" mb="auto" mt="8px">
         <Box ps="0px" pe={{ md: '0px', '2xl': '0px' }}>
-          <Links routes={routes} />
+          <Links routes={routes} orai={orai} wecoin={wecoin} />
         </Box>
       </Stack>
 
