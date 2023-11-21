@@ -24,6 +24,9 @@ import { useEffect, useState } from 'react';
 import { MdAutoAwesome, MdBolt, MdEdit, MdPerson } from 'react-icons/md';
 import Bg from '../public/img/chat/bg-image.png';
 
+import { myCustomQuery, myCustomExecute } from '@/api/counter';
+import MyModal from '@/components/myModal/MyModal';
+
 export default function Chat(props: { apiKeyApp: string }) {
   // *** If you use .env.local variable for your API key, method which we recommend, use the apiKey variable commented below
   const { apiKeyApp } = props;
@@ -36,6 +39,24 @@ export default function Chat(props: { apiKeyApp: string }) {
   const [model, setModel] = useState<OpenAIModel>('gpt-3.5-turbo');
   // Loading state
   const [loading, setLoading] = useState<boolean>(false);
+
+  // my input
+  const [myInput, setMyInput] = useState<string>('');
+
+  // my confirm execute
+  const [myConfirmExecute, setMyConfirmExecute] = useState<boolean>(false);
+
+  // my modal
+  const [isShowModal, setIsShowModal] = useState(false);
+
+  // my AI resposne msg
+  const [aiMsg, setAiMsg] = useState<string>('');
+
+  // my args
+  const [myArgs, setMyArgs] = useState<any>({});
+
+  // my array input
+  const [myConversation, setMyConversation] = useState<any>([]);
 
   // API Key
   // const [apiKey, setApiKey] = useState<string>(apiKeyApp);
@@ -155,6 +176,80 @@ export default function Chat(props: { apiKeyApp: string }) {
     setInputCode(Event.target.value);
   };
 
+  const handleChangeForMyInput = (Event: any) => {
+    setMyInput(Event.target.value);
+  };
+
+  const handleChangeForMyConversation = (type: any, msg: string) => {
+    setMyConversation((prevConversation: []) => [
+      ...prevConversation,
+      {
+        type,
+        msg,
+      },
+    ]);
+  };
+
+  const handleMyTranslate = async () => {
+    handleChangeForMyConversation('user', myInput);
+
+    fetch('https://dd31-2a09-bac5-d46b-16d2-00-246-51.ngrok-free.app/hello', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((res) => {
+        console.log(res);
+        res.json();
+      })
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((err) => console.log(err));
+
+    fetch('http://localhost:8000/request', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        input: myInput,
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const { action, type, args, message } = data;
+        if (type === 'query') {
+          console.log(data);
+          return myCustomQuery(
+            'orai10j8hdhrkjysjk55s4x3x53k8jj8zxc2jwnum0qd8spkdctys9ynqeymqet',
+            args,
+          );
+        } else if (type == 'execute') {
+          setIsShowModal(true);
+          setAiMsg(message);
+          setMyArgs(args);
+        }
+      })
+      .then((result) => {
+        console.log(result);
+        handleChangeForMyConversation('ai', "just temp for test");
+      })
+      .catch((err) => console.log(err));
+  };
+
+  useEffect(() => {
+    if (myConfirmExecute) {
+      myCustomExecute(
+        'orai17mq0sg6ey9u2c5pwjjn8l6sppacrrzfucx5r97pcn25d6mjuax2qza6jar',
+        myArgs,
+      ).then((result) => {
+        console.log(result);
+      });
+    }
+  }, [myConfirmExecute]);
+
   return (
     <Flex
       w="100%"
@@ -162,7 +257,15 @@ export default function Chat(props: { apiKeyApp: string }) {
       direction="column"
       position="relative"
     >
-      
+      {isShowModal && (
+        <MyModal
+          showModal={isShowModal}
+          setShowModal={setIsShowModal}
+          aiMsg={aiMsg}
+          setMyConfirmExecute={setMyConfirmExecute}
+        />
+      )}
+
       <Flex
         direction="column"
         mx="auto"
@@ -178,14 +281,10 @@ export default function Chat(props: { apiKeyApp: string }) {
             w="max-content"
             mb="20px"
             borderRadius="60px"
-          >
-            
-      
-          </Flex>
+          ></Flex>
 
           <Accordion color={gray} allowToggle w="100%" my="0px" mx="auto">
             <AccordionItem border="none">
-              
               <AccordionPanel mx="auto" w="max-content" p="0px 0px 10px 0px">
                 <Text
                   color={gray}
@@ -308,8 +407,7 @@ export default function Chat(props: { apiKeyApp: string }) {
             _hover={{
               boxShadow:
                 '0px 21px 27px -10px rgba(96, 60, 255, 0.48) !important',
-              bg:
-                'linear-gradient(15.46deg, #4A25E1 26.3%, #7B5AFF 86.4%) !important',
+              bg: 'linear-gradient(15.46deg, #4A25E1 26.3%, #7B5AFF 86.4%) !important',
               _disabled: {
                 bg: 'linear-gradient(15.46deg, #4A25E1 26.3%, #7B5AFF 86.4%)',
               },
@@ -320,8 +418,50 @@ export default function Chat(props: { apiKeyApp: string }) {
             Submit
           </Button>
         </Flex>
-
-        
+        <Flex
+          ms={{ base: '0px', xl: '60px' }}
+          mt="20px"
+          justifySelf={'flex-end'}
+        >
+          <Input
+            minH="54px"
+            h="100%"
+            border="1px solid"
+            borderColor={borderColor}
+            borderRadius="45px"
+            p="15px 20px"
+            me="10px"
+            fontSize="sm"
+            fontWeight="500"
+            _focus={{ borderColor: 'none' }}
+            color={inputColor}
+            _placeholder={placeholderColor}
+            placeholder="My message"
+            onChange={handleChangeForMyInput}
+          />
+          <Button
+            variant="primary"
+            py="20px"
+            px="16px"
+            fontSize="sm"
+            borderRadius="45px"
+            ms="auto"
+            w={{ base: '160px', md: '210px' }}
+            h="54px"
+            _hover={{
+              boxShadow:
+                '0px 21px 27px -10px rgba(96, 60, 255, 0.48) !important',
+              bg: 'linear-gradient(15.46deg, #4A25E1 26.3%, #7B5AFF 86.4%) !important',
+              _disabled: {
+                bg: 'linear-gradient(15.46deg, #4A25E1 26.3%, #7B5AFF 86.4%)',
+              },
+            }}
+            onClick={handleMyTranslate}
+            isLoading={loading ? true : false}
+          >
+            My Submit
+          </Button>
+        </Flex>
       </Flex>
     </Flex>
   );

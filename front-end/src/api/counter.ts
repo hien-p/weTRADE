@@ -3,6 +3,17 @@ import { getAddress, getClient, getSigningClient } from '../lib/client';
 import { getContractAddr } from '../lib/state';
 import {} from '@oraichain/common-contracts-sdk';
 
+export const myCustomQuery = async (contractAddr: any, msg: any) => {
+  const client = await getClient();
+  const result = await client.queryContractSmart(contractAddr, msg);
+  return result;
+};
+
+export const myCustomExecute = async (contractAddr: any, msg: any) => {
+  const client = await getSigningClient();
+  return await client.execute(await getAddress(), contractAddr, msg, 'auto');
+};
+
 export const getWecoinBalance = async () => {
   const client = await getClient();
   const wecoinInfo = await await client.queryContractSmart(
@@ -13,7 +24,7 @@ export const getWecoinBalance = async () => {
     'orai10j8hdhrkjysjk55s4x3x53k8jj8zxc2jwnum0qd8spkdctys9ynqeymqet',
     { balance: { address: 'orai1yzsegvns6vmvf5q29uv26p3th4fd2kzmsq3h6m' } },
   );
-  const {symbol} = wecoinInfo;
+  const { symbol } = wecoinInfo;
   return {
     symbol,
     wecoinBalace,
@@ -54,7 +65,7 @@ export const getCount = async () => {
     'orai10j8hdhrkjysjk55s4x3x53k8jj8zxc2jwnum0qd8spkdctys9ynqeymqet',
     { token_info: {} },
   );
-  console.log(wecoinInfo)
+  console.log(wecoinInfo);
 
   return await client.queryContractSmart(getContractAddr(), { get_count: {} });
 };
@@ -76,7 +87,7 @@ export const useOraiBalance = () => {
     error,
     mutate,
   };
-}
+};
 
 export const useWecoinBalance = () => {
   const { data, error, mutate } = useSWR('/counter/wecoin', getWecoinBalance);
@@ -85,7 +96,7 @@ export const useWecoinBalance = () => {
     error,
     mutate,
   };
-}
+};
 
 export const useCount = () => {
   const { data, error, mutate } = useSWR('/counter/count', getCount);
